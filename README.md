@@ -7,7 +7,7 @@ Training python with hexagonal architecture.
 
 ## Run
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Run example app with docker and docker-compose.
 
 ```bash
 docker-compose up
