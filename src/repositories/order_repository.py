@@ -2,8 +2,10 @@ from abc import abstractmethod, ABC
 
 from src.entities.order import Order
 
+
 class Order_Repository(ABC):
     """Entity order database methods"""
+
     @abstractmethod
     def get_by_id(self, id: str) -> Order:
         """Retrieve an Order by id"""

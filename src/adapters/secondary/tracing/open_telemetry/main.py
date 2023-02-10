@@ -5,9 +5,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.pymongo import PymongoInstrumentor
 
-resource = Resource(attributes={
-    SERVICE_NAME: "my-fast-app"
-})
+resource = Resource(attributes={SERVICE_NAME: "my-fast-app"})
 
 jaeger_exporter = JaegerExporter(
     agent_host_name="jaeger",

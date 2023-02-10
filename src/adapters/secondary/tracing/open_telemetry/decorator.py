@@ -31,8 +31,15 @@ class TracingDecoratorOptions:
             TracingDecoratorOptions.default_attributes[att] = attributes[att]
 
 
-def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bool = True,
-               attributes: Dict[str, str] = None, existing_tracer: Tracer = None, ignore=False):
+def instrument(
+    _func_or_class=None,
+    *,
+    span_name: str = "",
+    record_exception: bool = True,
+    attributes: Dict[str, str] = None,
+    existing_tracer: Tracer = None,
+    ignore=False
+):
     """
     A decorator to instrument a class or function with an OTEL tracing span.
     :param cls: internal, used to specify scope of instrumentation
@@ -51,16 +58,29 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
     def decorate_class(cls):
         for name, method in inspect.getmembers(cls, inspect.isfunction):
             # Ignore private functions, TODO: maybe make this a setting?
-            if not name.startswith('_'):
-
+            if not name.startswith("_"):
                 if isinstance(inspect.getattr_static(cls, name), staticmethod):
-                    setattr(cls, name, staticmethod(instrument(record_exception=record_exception,
-                                                               attributes=attributes,
-                                                               existing_tracer=existing_tracer)(method)))
+                    setattr(
+                        cls,
+                        name,
+                        staticmethod(
+                            instrument(
+                                record_exception=record_exception,
+                                attributes=attributes,
+                                existing_tracer=existing_tracer,
+                            )(method)
+                        ),
+                    )
                 else:
-                    setattr(cls, name, instrument(record_exception=record_exception,
-                                                  attributes=attributes,
-                                                  existing_tracer=existing_tracer)(method))
+                    setattr(
+                        cls,
+                        name,
+                        instrument(
+                            record_exception=record_exception,
+                            attributes=attributes,
+                            existing_tracer=existing_tracer,
+                        )(method),
+                    )
 
         return cls
 
@@ -68,11 +88,7 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
     if inspect.isclass(_func_or_class):
         return decorate_class(_func_or_class)
 
-
-
-
     def span_decorator(func_or_class):
-
         if inspect.isclass(func_or_class):
             return decorate_class(func_or_class)
 
@@ -80,12 +96,12 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
 
         # Check if already decorated (happens if both class and function
         # decorated). If so, we keep the function decorator settings only
-        undecorated_func = getattr(func_or_class, '__tracing_unwrapped__', None)
+        undecorated_func = getattr(func_or_class, "__tracing_unwrapped__", None)
         if undecorated_func:
             # We have already decorated this function, override
             return func_or_class
 
-        setattr(func_or_class, '__tracing_unwrapped__', func_or_class)
+        setattr(func_or_class, "__tracing_unwrapped__", func_or_class)
 
         tracer = existing_tracer or trace.get_tracer(func_or_class.__module__)
 
@@ -95,7 +111,6 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
             span.set_attribute(SpanAttributes.CODE_FILEPATH, func.__code__.co_filename)
             span.set_attribute(SpanAttributes.CODE_LINENO, func.__code__.co_firstlineno)
 
-
         def _set_attributes(span, attributes_dict):
             if attributes_dict:
                 for att in attributes_dict:
@@ -104,8 +119,10 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
         @wraps(func_or_class)
         def wrap_with_span_sync(*args, **kwargs):
             name = span_name or TracingDecoratorOptions.naming_scheme(func_or_class)
-            with tracer.start_as_current_span(name, record_exception=record_exception) as span:
-                _set_semantic_attributes(span,func_or_class)
+            with tracer.start_as_current_span(
+                name, record_exception=record_exception
+            ) as span:
+                _set_semantic_attributes(span, func_or_class)
                 _set_attributes(span, TracingDecoratorOptions.default_attributes)
                 _set_attributes(span, attributes)
                 return func_or_class(*args, **kwargs)
@@ -113,8 +130,10 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
         @wraps(func_or_class)
         async def wrap_with_span_async(*args, **kwargs):
             name = span_name or TracingDecoratorOptions.naming_scheme(func_or_class)
-            with tracer.start_as_current_span(name, record_exception=record_exception) as span:
-                _set_semantic_attributes(span,func_or_class)
+            with tracer.start_as_current_span(
+                name, record_exception=record_exception
+            ) as span:
+                _set_semantic_attributes(span, func_or_class)
                 _set_attributes(span, TracingDecoratorOptions.default_attributes)
                 _set_attributes(span, attributes)
                 return await func_or_class(*args, **kwargs)
@@ -122,7 +141,11 @@ def instrument(_func_or_class=None, *, span_name: str = "", record_exception: bo
         if ignore:
             return func_or_class
 
-        wrapper = wrap_with_span_async if asyncio.iscoroutinefunction(func_or_class) else wrap_with_span_sync
+        wrapper = (
+            wrap_with_span_async
+            if asyncio.iscoroutinefunction(func_or_class)
+            else wrap_with_span_sync
+        )
         wrapper.__signature__ = inspect.signature(func_or_class)
 
         return wrapper
