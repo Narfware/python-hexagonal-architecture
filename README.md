@@ -13,6 +13,20 @@ Run example app with docker and docker-compose.
 docker-compose up
 ```
 
+## Testing
+
+Run unit tests
+
+```bash
+make test-unit
+```
+
+Run component tests (with the application running)
+
+```bash
+make test-component
+```
+
 ## Tracing
 
 App instrumented with opentelemetry
