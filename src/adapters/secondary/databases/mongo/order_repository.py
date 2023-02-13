@@ -1,6 +1,7 @@
 from src.entities.order import Order
 from src.repositories.order_repository import Order_Repository
 from src.adapters.secondary.tracing.open_telemetry.decorator import instrument
+from typing import Optional
 from pymongo import MongoClient
 
 
@@ -22,16 +23,16 @@ class Mongo_Order_Repository(Order_Repository):
 
     def update(self, order: Order) -> None:
         self.client.get_database().get_collection(self.collection).update_one(
-            {"_id": order["_id"]}, {"$set": order.__dict__}
+            {"_id": order._id}, {"$set": order.__dict__}
         )
 
-    def get_by_id(self, id: str) -> Order:
+    def get_by_id(self, id: str) -> Optional[Order]:
         result = (
             self.client.get_database()
             .get_collection(self.collection)
             .find_one({"_id": id})
         )
-        return Order(result) if result != None else None
+        return Order(**result) if result != None else None
 
     def get_by_user_id(self, user_id: str) -> list[Order]:
         results = list(
