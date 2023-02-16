@@ -1,16 +1,22 @@
 import logging
 from fastapi import status, FastAPI, HTTPException
-from src.adapters.secondary.tracing.open_telemetry.decorator import instrument
 from src.adapters.primary.dtos.order_creation import Order_Creation
 from src.use_cases.order.create_order.main import Create_Order
-from src.adapters.secondary.tracing.open_telemetry.main import tracer
 from src.adapters.primary.dtos.order import Order
+from dependency_injector.wiring import inject, Provide
+from containers import Container
+
 
 logger = logging.getLogger(__name__)
 
 
+@inject
 class Order_Controller:
-    def __init__(self, app: FastAPI, create_order_use_case: Create_Order):
+    def __init__(
+        self,
+        app: FastAPI,
+        create_order_use_case: Create_Order = Provide[Container.create_order_use_case],
+    ):
         self.app = app
         self.create_order_use_case = create_order_use_case
 
