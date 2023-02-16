@@ -18,7 +18,7 @@ class Order:
         _id: str,
         user_id: str,
         product_id: str,
-        status: str,
+        status: ORDER_STATUS,
         created_at: datetime.date,
     ):
         self._id = _id
@@ -27,7 +27,7 @@ class Order:
         self.status = status
         self.created_at = created_at
 
-    def get_status(self) -> str:
+    def get_status(self) -> ORDER_STATUS:
         return self.status
 
     def set_status(self, new_status: ORDER_STATUS) -> None:
