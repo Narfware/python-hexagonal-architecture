@@ -1,3 +1,4 @@
+from src.exceptions.simultaneous_order import Simultaneous_order_error
 from src.ports.id_generator import IId_generator
 from src.repositories.order_repository import Order_Repository
 from src.entities.order import Order, ORDER_STATUS
@@ -19,13 +20,13 @@ class Create_Order:
         )
 
         if order_in_process:
-            raise Exception("Only one simultaneous order is allowed")
+            raise Simultaneous_order_error("Only one simultaneous order is allowed")
 
         new_order = Order(
             _id=self.id_generator.generate(),
             user_id=user_id,
             product_id=product_id,
-            status="NEW",
+            status=ORDER_STATUS.NEW,
             created_at=datetime.now(),
         )
 
