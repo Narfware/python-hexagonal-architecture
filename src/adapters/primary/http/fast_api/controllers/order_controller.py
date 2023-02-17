@@ -23,16 +23,11 @@ class Order_Controller:
         self.create_order_use_case = create_order_use_case
 
         @app.post("/orders", status_code=status.HTTP_201_CREATED)
-        def create_order(order_data: Order_Creation) -> Order:
+        def create_order(order_data: Order_Creation) -> Optional[str]:
             try:
                 order = self.create_order_use_case.execute(
                     "user_id", order_data.product_id
                 )
-                return Order(
-                    user_id=order.user_id,
-                    product_id=order.product_id,
-                    status=order.status,
-                    created_at=order.created_at,
-                )
+                return order._id
             except Exception as error:
                 manage_exception(error)
