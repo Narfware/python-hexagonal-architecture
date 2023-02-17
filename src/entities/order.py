@@ -24,7 +24,7 @@ class Order:
         self._id = _id
         self.user_id = user_id
         self.product_id = product_id
-        self.status = status
+        self.status = status.value
         self.created_at = created_at
 
     def get_status(self) -> ORDER_STATUS:
