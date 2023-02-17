@@ -1,10 +1,12 @@
 import logging
-from fastapi import status, FastAPI, HTTPException
+from fastapi import status, FastAPI
+from typing import Optional
 from src.adapters.primary.dtos.order_creation import Order_Creation
 from src.use_cases.order.create_order.main import Create_Order
 from src.adapters.primary.dtos.order import Order
 from dependency_injector.wiring import inject, Provide
 from containers import Container
+from src.adapters.primary.http.fast_api.exception_manager import manage_exception
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +35,4 @@ class Order_Controller:
                     created_at=order.created_at,
                 )
             except Exception as error:
-                logger.exception(error)
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
-                )
+                manage_exception(error)
